@@ -45,18 +45,27 @@ const tiles=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{minZoo
 tiles.on('tileerror',()=>{status.textContent='erro ao carregar mapa';});tiles.on('load',()=>{status.textContent='● mapa online';});
 L.control.zoom({position:'bottomright'}).addTo(map);
 const layer=L.layerGroup().addTo(map);
-// Esboços cartográficos ilustrativos, não limites geopolíticos exatos. A camada muda junto com a linha do tempo.
-const historyLayer=L.layerGroup();let historyLegend=null;
-const historicTerritories=[
- {name:'Império Romano (máxima extensão aproximada)',start:117,end:476,color:'#e6a23c',coords:[[56,5],[54,25],[48,38],[40,42],[30,33],[29,15],[35,-10],[44,-9],[50,-5]]},
- {name:'Império Mongol (extensão aproximada)',start:1206,end:1368,color:'#c77dff',coords:[[55,45],[58,80],[50,120],[35,125],[25,105],[28,75],[38,55]]},
- {name:'Império Otomano (área central aproximada)',start:1299,end:1922,color:'#ef6b73',coords:[[48,20],[45,35],[38,45],[28,40],[29,25],[36,18]]},
- {name:'Império Britânico (áreas representativas, não contínuas)',start:1750,end:1960,color:'#5ba9e8',coords:[[58,-8],[52,2],[48,-6],[49,-12],[55,-10]]},
- {name:'União Soviética (contorno aproximado)',start:1922,end:1991,color:'#e36f9a',coords:[[70,28],[72,60],[68,100],[62,145],[48,135],[42,90],[48,45],[55,30]]},
- {name:'Brasil independente (área continental esquemática)',start:1822,end:2026,color:'#55bd91',coords:[[5,-73],[2,-50],[-5,-35],[-22,-39],[-34,-53],[-30,-58],[-10,-70]]}
-];
-function refreshHistoricalLayer(y){historyLayer.clearLayers();if(!map.hasLayer(historyLayer)){if(historyLegend){map.removeControl(historyLegend);historyLegend=null;}return;}const active=historicTerritories.filter(t=>y>=t.start&&y<=t.end);active.forEach(t=>{L.polygon(t.coords,{color:t.color,weight:2,opacity:.95,fillColor:t.color,fillOpacity:.18,dashArray:'5 4'}).bindPopup(`<b>${esc(t.name)}</b><br>${yearText(t.start)} – ${yearText(t.end)}<br><small>Representação didática aproximada; não usar como fronteira histórica exata.</small>`).addTo(historyLayer);});if(historyLegend)map.removeControl(historyLegend);historyLegend=L.control({position:'bottomleft'});historyLegend.onAdd=()=>{const d=L.DomUtil.create('div','history-legend');d.innerHTML=`<b>Territórios históricos · ${yearText(y)}</b>${active.length?active.map(t=>`<div>● ${esc(t.name)}</div>`).join(''):'Nenhum território esquemático cadastrado para esta época.'}<div style="opacity:.75;margin-top:4px">Contornos aproximados para exploração visual.</div>`;return d;};historyLegend.addTo(map);}
-L.control.layers({'Mapa de ruas':tiles},{'Territórios históricos (aprox.)':historyLayer},{position:'topright',collapsed:true}).addTo(map);map.on('overlayadd overlayremove',e=>{if(e.layer===historyLayer)refreshHistoricalLayer(Number(range?.value||1490));});
+// Camada visual temporal: imagens reais de satélite da NASA GIBS.
+// A camada acompanha o ano selecionado; MODIS True Color está disponível desde 2000.
+const historicalImagery=L.tileLayer('',{minZoom:1,maxZoom:9,opacity:1,updateWhenIdle:true,keepBuffer:2,attribution:'Imagens: NASA EOSDIS GIBS / MODIS'});
+function imageryUrl(y){
+ const year=Math.max(2000,Math.min(2026,Math.round(y)));
+ // Uma data consistente no meio do ano evita sugerir resolução diária inexistente.
+ const date=`${year}-06-15`;
+ return `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_CorrectedReflectance_TrueColor/default/${date}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg`;
+}
+function refreshHistoricalLayer(y){
+ const available=y>=2000;
+ historicalImagery.setOpacity(available?1:0);
+ historicalImagery.setUrl(imageryUrl(y));
+ if(!available){
+  // Não mostrar uma imagem moderna como se fosse histórica: antes de 2000, volta ao mapa-base.
+  if(map.hasLayer(historicalImagery))map.removeLayer(historicalImagery);
+ }else if(!map.hasLayer(historicalImagery))historicalImagery.addTo(map);
+}
+const currentSatellite=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{minZoom:1,maxZoom:19,attribution:'Imagens: Esri e colaboradores'});
+L.control.layers({'Mapa de ruas':tiles,'Satélite atual':currentSatellite},{'Satélite histórico (2000+)':historicalImagery},{position:'topright',collapsed:true}).addTo(map);
+map.on('overlayadd overlayremove',e=>{if(e.layer===historicalImagery)refreshHistoricalLayer(Number(range.value||1490));});
 let searchItems=[],allItems=[],playing=false,playTimer=null,allMode=true,requestId=0;
 let suggestTimer=null,suggestRequest=0,lastSuggestAt=0,suggestRows=[],suggestIndex=-1;
 // yearStart/yearEnd are approximate and explicitly presented as approximate when sourced from broad eras.
@@ -154,7 +163,7 @@ function renderWorldNow(y){
  list.querySelectorAll('[data-world-index]').forEach(el=>el.addEventListener('click',()=>{const o=events[Number(el.dataset.worldIndex)];if(!o)return;closeResults();if(o._marker){map.flyTo([o.lat,o.lon],Math.max(4,map.getZoom()),{duration:.4});o._marker.openPopup();}else{const m=marker(o);if(m){o._marker=m;allItems.push(o);m.addTo(layer);map.flyTo([o.lat,o.lon],Math.max(4,map.getZoom()),{duration:.4});m.openPopup();}}}));
 }
 $('worldToggle').addEventListener('change',e=>{const panel=$('worldNow');panel.classList.toggle('open',e.target.checked);panel.setAttribute('aria-hidden',String(!e.target.checked));if(e.target.checked){renderWorldNow(Number(range.value));setTimeout(()=>map.invalidateSize(),60);}});
-function refreshTime(){const y=Number(range.value);yearLabel.textContent=allMode?'Todos os tempos':yearText(y);eraLabel.textContent=allMode?'Escolha um ano para comparar acontecimentos mundiais':`O que acontecia no mundo em ${yearText(y)}`;layer.clearLayers();let visible=0;allItems.forEach(o=>{const inTime=allMode||(o.year!=null&&inSelectedEra(o,y));if(inTime){const m=o._marker||marker(o);if(m){m.addTo(layer);visible++;}}});countLabel.textContent=`${visible} ${visible===1?'marcador':'marcadores'}`;refreshHistoricalLayer(y);if(!allMode)renderWorldNow(y);else{$('worldCount').textContent='Escolha uma época';$('worldList').innerHTML='<div class="worldempty">Mova a linha do tempo para comparar acontecimentos de diferentes regiões que ocorreram na mesma época.</div>';}}
+function refreshTime(){const y=Number(range.value);yearLabel.textContent=allMode?'Todos os tempos':yearText(y);eraLabel.textContent=allMode?'Todas as épocas':yearText(y);layer.clearLayers();let visible=0;allItems.forEach(o=>{const inTime=allMode||(o.year!=null&&inSelectedEra(o,y));if(inTime){const m=o._marker||marker(o);if(m){m.addTo(layer);visible++;}}});countLabel.textContent=`${visible} ${visible===1?'marcador':'marcadores'}`;refreshHistoricalLayer(y);if(!allMode)renderWorldNow(y);else{$('worldCount').textContent='Escolha uma época';$('worldList').innerHTML='<div class="worldempty">Mova a linha do tempo para comparar acontecimentos de diferentes regiões que ocorreram na mesma época.</div>';}}
 function closeResults(){results.style.display='none';results.innerHTML='';}
 function showResults(items){
  results.innerHTML='<button class="close" id="closeResults">Fechar ×</button>';
