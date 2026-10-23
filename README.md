@@ -1,12 +1,19 @@
-# Cronomaps — estrutura mínima
+# Cronomaps — mapa histórico com busca inteligente
 
-O conteúdo da interface, estilos, JavaScript e dados locais está reunido em `app/src/main/assets/index.html`.
+O conteúdo principal da interface, estilos, JavaScript e dados locais está reunido em `app/src/main/assets/index.html`.
+
+## Recursos
+- Mapa histórico interativo com marcadores, linha do tempo e acontecimentos simultâneos.
+- Busca online em Wikipédia, Wikidata, Internet Archive e geocodificação OpenStreetMap/Nominatim.
+- **Autocompletar:** ao digitar pelo menos três caracteres, o aplicativo sugere lugares, pessoas e entidades; toque numa sugestão para pesquisar e, quando for um lugar, aproximar o mapa.
+- Navegação por teclado nas sugestões (setas, Enter e Esc), útil em dispositivos com teclado físico.
+- Consultas de sugestões com atraso de 550 ms para reduzir pedidos repetidos enquanto se digita.
 
 ## Pastas dentro de `app/src/main`
-- `assets/` — um único arquivo `index.html`.
-- `java/` — um único arquivo `MainActivity.kt`.
+- `assets/` — interface, CSS e JavaScript em `index.html`.
+- `java/` — `MainActivity.kt`.
 
-As demais pastas na raiz são arquivos de configuração do Android/Gradle e do GitHub Actions, necessários para compilar o APK automaticamente. A busca online usa a API pública da Wikipédia. O globo agora usa Globe.gl para renderizar a Terra em 3D, com textura terrestre, contornos dos países, rotação por toque/arraste, zoom e marcadores históricos. A textura, a biblioteca e os contornos dependem de conexão com a internet.
+As demais pastas contêm configurações Android/Gradle e o workflow GitHub Actions necessários para gerar o APK. As buscas, imagens e os blocos do mapa dependem da internet e da disponibilidade das APIs públicas; não exigem uma chave de API privada.
 
 ## Gerar APK
-Envie todos os arquivos do ZIP para um repositório GitHub mantendo a pasta oculta `.github`. Na aba Actions, execute o workflow Android. O APK de depuração será disponibilizado como artefato `cronomaps-apk` se a compilação terminar com sucesso.
+Envie os arquivos do ZIP para o repositório GitHub mantendo a pasta oculta `.github`. Na aba **Actions**, execute o workflow Android. Se a compilação terminar com sucesso, baixe o artefato `cronomaps-apk`.
