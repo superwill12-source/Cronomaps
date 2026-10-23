@@ -44,8 +44,8 @@
 </main>
 <div id="detailModal" class="modal hidden" role="dialog" aria-modal="true"><div class="modal-card"><button id="closeModal" class="close" aria-label="Fechar">×</button><div id="detailContent"></div></div></div>
 <script>const HISTORICAL_EVENTS = [{"id": "egito-antigo", "titulo": "Egito Antigo", "tipo": "Civilização", "inicio": -3100, "fim": 30, "local": "Vale do Nilo, nordeste da África", "lat": 26.8, "lon": 30.8, "resumo": "Civilização do nordeste da África conhecida pela organização estatal, escrita hieroglífica, monumentos e longa história dinástica.", "contexto": "O Egito antigo atravessou períodos distintos; datas e fronteiras variam conforme a fase considerada.", "fonte": "https://www.britannica.com/place/ancient-Egypt"}, {"id": "cleopatra", "titulo": "Cleópatra VII", "tipo": "Personagem", "inicio": -69, "fim": -30, "local": "Alexandria, Egito", "lat": 31.2, "lon": 29.9, "resumo": "Última governante ativa do reino ptolemaico do Egito, ligada aos conflitos políticos de Roma no século I a.C.", "contexto": "Sua vida é conhecida por fontes antigas frequentemente escritas por autores ligados aos vencedores romanos.", "fonte": "https://www.britannica.com/biography/Cleopatra-queen-of-Egypt"}, {"id": "roma", "titulo": "Roma Antiga", "tipo": "Civilização", "inicio": -753, "fim": 476, "local": "Roma, atual Itália", "lat": 41.9, "lon": 12.5, "resumo": "Sociedade que passou da monarquia à república e ao império, exercendo influência duradoura no Mediterrâneo e na Europa.", "contexto": "476 d.C. é uma data convencional para o fim do Império Romano do Ocidente; o Império do Oriente continuou.", "fonte": "https://www.britannica.com/place/ancient-Rome"}, {"id": "ana-bolena", "titulo": "Ana Bolena", "tipo": "Personagem", "inicio": 1501, "fim": 1536, "local": "Inglaterra", "lat": 51.5, "lon": -0.1, "resumo": "Rainha consorte de Henrique VIII e mãe de Elizabeth I. Foi executada em 1536, durante conflitos dinásticos e religiosos na corte Tudor.", "contexto": "O ano de nascimento é incerto; estimativas comuns situam-no entre 1501 e 1507.", "fonte": "https://www.britannica.com/biography/Anne-Boleyn"}, {"id": "peste-negra", "titulo": "Peste Negra na Europa", "tipo": "Epidemia histórica", "inicio": 1347, "fim": 1353, "local": "Europa, com impacto em várias regiões da Eurásia", "lat": 45.5, "lon": 9.2, "resumo": "Grande onda de peste que causou mortalidade muito elevada em partes da Europa e transformações sociais e econômicas.", "contexto": "A epidemia fez parte de uma pandemia mais ampla; impacto e cronologia variaram por região.", "fonte": "https://www.britannica.com/event/Black-Death"}, {"id": "salem", "titulo": "Julgamentos das bruxas de Salém", "tipo": "Julgamento", "inicio": 1692, "fim": 1693, "local": "Colônia da Baía de Massachusetts, atual Estados Unidos", "lat": 42.52, "lon": -70.9, "resumo": "Série de acusações e julgamentos por bruxaria na Nova Inglaterra colonial, que resultou em execuções e prisões.", "contexto": "É um episódio específico e não representa todos os processos de caça às bruxas, que ocorreram em épocas e regiões diferentes.", "fonte": "https://www.britannica.com/event/Salem-witchcraft-trials"}, {"id": "revolucao-francesa", "titulo": "Revolução Francesa", "tipo": "Revolução", "inicio": 1789, "fim": 1799, "local": "França", "lat": 48.86, "lon": 2.35, "resumo": "Transformação política e social que derrubou a monarquia francesa e alterou profundamente a política europeia.", "contexto": "Os limites cronológicos convencionais variam; 1789 marca o início e 1799 o golpe de 18 de Brumário.", "fonte": "https://www.britannica.com/event/French-Revolution"}, {"id": "segunda-guerra", "titulo": "Segunda Guerra Mundial", "tipo": "Guerra", "inicio": 1939, "fim": 1945, "local": "Conflito global", "lat": 52.5, "lon": 13.4, "resumo": "Guerra mundial entre potências do Eixo e Aliados, marcada por combates em vários continentes, genocídio e uso de armas nucleares.", "contexto": "O início convencional na Europa é 1939; conflitos na Ásia tinham antecedentes anteriores.", "fonte": "https://www.britannica.com/event/World-War-II"}];</script>
-<script src="https://unpkg.com/globe.gl@2.41.12/dist/globe.gl.min.js"></script>
-<script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/globe.gl@2.46.2/dist/globe.gl.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
 <script>
 /* Globo terrestre 3D real. A biblioteca e a textura são carregadas pela internet. */
 (() => {
@@ -53,13 +53,13 @@
  let globe=null, markers=[];
  const statusText=t=>{if(status)status.textContent=t};
  function initGlobe(){
-  if(typeof Globe!=='function'){statusText('Não foi possível carregar o globo. Verifique a conexão e tente reabrir.');return}
+  if(typeof Globe!=='function'){statusText('Biblioteca 3D não carregou. Verifique a internet e tente novamente.');return} if(!window.WebGLRenderingContext){statusText('Este aparelho/WebView não oferece suporte a WebGL para o globo 3D.');return}
   try {
    globe=Globe()(host)
     .backgroundColor('rgba(0,0,0,0)')
     .showAtmosphere(true).atmosphereColor('#65d9e8').atmosphereAltitude(0.16)
-    .globeImageUrl('https://unpkg.com/three-globe@2.41.12/example/img/earth-blue-marble.jpg')
-    .bumpImageUrl('https://unpkg.com/three-globe@2.41.12/example/img/earth-topology.png')
+    .globeImageUrl('https://cdn.jsdelivr.net/npm/three-globe@2.45.0/example/img/earth-blue-marble.jpg')
+    .bumpImageUrl('https://cdn.jsdelivr.net/npm/three-globe@2.45.0/example/img/earth-topology.png')
     .pointsData([]).pointLat('lat').pointLng('lon').pointColor(()=> '#f4cc69')
     .pointAltitude(0.025).pointRadius(0.48).pointLabel(d=>`<b>${String(d.titulo||'Acontecimento histórico')}</b><br>${String(d.local||'')}`)
     .onPointClick(p=>{if(p && Number.isFinite(p.lat)&&Number.isFinite(p.lon)){globe.pointOfView({lat:p.lat,lng:p.lon,altitude:1.5},1000)}});
@@ -67,7 +67,7 @@
    const resize=()=>{if(!globe)return;const r=host.getBoundingClientRect();globe.width(Math.max(250,r.width)).height(Math.max(250,r.height))};
    window.addEventListener('resize',resize);resize();
    statusText('Globo 3D carregado · buscando contornos dos países…');
-   fetch('https://unpkg.com/world-atlas@2.0.2/countries-110m.json')
+   fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json')
     .then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json()})
     .then(topology=>{if(window.topojson&&globe){const countries=topojson.feature(topology,topology.objects.countries).features;globe.polygonsData(countries).polygonCapColor(()=> 'rgba(28,91,105,0.18)').polygonSideColor(()=> 'rgba(101,217,232,0.08)').polygonStrokeColor(()=> 'rgba(101,217,232,0.28)').polygonAltitude(0.002);statusText('Globo terrestre 3D pronto · arraste e use pinça para zoom')}})
     .catch(()=>statusText('Globo 3D ativo; contornos políticos indisponíveis nesta conexão.'));
