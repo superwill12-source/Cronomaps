@@ -45,27 +45,31 @@ const tiles=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{minZoo
 tiles.on('tileerror',()=>{status.textContent='erro ao carregar mapa';});tiles.on('load',()=>{status.textContent='● mapa online';});
 L.control.zoom({position:'bottomright'}).addTo(map);
 const layer=L.layerGroup().addTo(map);
-// Camada visual temporal: imagens reais de satélite da NASA GIBS.
-// A camada acompanha o ano selecionado; MODIS True Color está disponível desde 2000.
-const historicalImagery=L.tileLayer('',{minZoom:1,maxZoom:9,opacity:1,updateWhenIdle:true,keepBuffer:2,attribution:'Imagens: NASA EOSDIS GIBS / MODIS'});
+// Camadas escolhidas conforme a época: satélite histórico quando há imagens anuais
+// (NASA GIBS/MODIS, desde 2000) e cartografia histórica colaborativa para épocas antigas.
+// A cartografia antiga não é uma fotografia do ano exato; a cobertura varia por região.
+const historicalImagery=L.tileLayer('',{minZoom:1,maxZoom:19,maxNativeZoom:9,opacity:1,updateWhenIdle:true,keepBuffer:2,attribution:'Imagens: NASA EOSDIS GIBS / MODIS'});
 function imageryUrl(y){
  const year=Math.max(2000,Math.min(2026,Math.round(y)));
- // Uma data consistente no meio do ano evita sugerir resolução diária inexistente.
  const date=`${year}-06-15`;
  return `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_CorrectedReflectance_TrueColor/default/${date}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg`;
 }
-function refreshHistoricalLayer(y){
- const available=y>=2000;
- historicalImagery.setOpacity(available?1:0);
- historicalImagery.setUrl(imageryUrl(y));
- if(!available){
-  // Não mostrar uma imagem moderna como se fosse histórica: antes de 2000, volta ao mapa-base.
-  if(map.hasLayer(historicalImagery))map.removeLayer(historicalImagery);
- }else if(!map.hasLayer(historicalImagery))historicalImagery.addTo(map);
-}
+const historicalMap=L.tileLayer('https://tile.openhistoricalmap.org/{z}/{x}/{y}.png',{minZoom:1,maxZoom:19,updateWhenIdle:true,keepBuffer:2,attribution:'© OpenHistoricalMap contributors · cobertura histórica variável'});
 const currentSatellite=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{minZoom:1,maxZoom:19,attribution:'Imagens: Esri e colaboradores'});
-L.control.layers({'Mapa de ruas':tiles,'Satélite atual':currentSatellite},{'Satélite histórico (2000+)':historicalImagery},{position:'topright',collapsed:true}).addTo(map);
-map.on('overlayadd overlayremove',e=>{if(e.layer===historicalImagery)refreshHistoricalLayer(Number(range.value||1490));});
+const baseLayers={'Mapa de ruas':tiles,'Satélite atual':currentSatellite,'Mapa histórico colaborativo':historicalMap,'Satélite histórico anual (2000+)':historicalImagery};
+L.control.layers(baseLayers,{}, {position:'topright',collapsed:true}).addTo(map);
+function selectBaseLayer(target){
+ Object.values(baseLayers).forEach(l=>{if(map.hasLayer(l)&&l!==target)map.removeLayer(l);});
+ if(!map.hasLayer(target))target.addTo(map);
+}
+function refreshHistoricalLayer(y){
+ const yr=Math.round(Number(y)||2026);
+ historicalImagery.setUrl(imageryUrl(yr));
+ if(allMode){selectBaseLayer(tiles);return;}
+ if(yr>=2000){selectBaseLayer(historicalImagery);status.textContent='Satélite histórico · '+yr+' · NASA';}
+ else if(yr<1900){selectBaseLayer(historicalMap);status.textContent='Cartografia histórica · cobertura variável por região';}
+ else{selectBaseLayer(historicalMap);status.textContent='Mapa histórico · imagens aéreas antigas podem variar por região';}
+}
 let searchItems=[],allItems=[],playing=false,playTimer=null,allMode=true,requestId=0;
 let suggestTimer=null,suggestRequest=0,lastSuggestAt=0,suggestRows=[],suggestIndex=-1;
 // yearStart/yearEnd are approximate and explicitly presented as approximate when sourced from broad eras.
@@ -177,12 +181,12 @@ function drawSuggestions(rows,q){const box=$('suggestions');suggestRows=rows.sli
  box.innerHTML=suggestRows.map((o,i)=>`<div class="suggestion" role="option" aria-selected="false" data-suggestion="${i}"><div class="suggestion-icon">${o.kind==='place'?'⌖':o.kind==='person'?'♙':o.kind==='event'?'◷':'⌕'}</div><div class="suggestion-copy"><strong>${esc(o.title)}</strong><small>${esc(o.subtitle||o.description||'')}</small></div><span class="suggestion-type">${o.kind==='place'?'Lugar':o.kind==='person'?'Pessoa':o.kind==='event'?'História':'Fonte'}</span></div>`).join('');box.style.display='block';$('query').setAttribute('aria-expanded','true');box.querySelectorAll('[data-suggestion]').forEach(el=>el.addEventListener('click',()=>chooseSuggestion(Number(el.dataset.suggestion))));}
 async function fetchSuggestions(raw){const q=raw.trim();if(q.length<3){closeSuggestions();return;}const id=++suggestRequest;const norm=normalizeQuery(q);if(!norm)return;const box=$('suggestions');box.innerHTML='<div class="suggestion-note">Procurando lugares, pessoas e acontecimentos…</div>';box.style.display='block';
  const encoded=encodeURIComponent(q);
- const tasks=[fetch('https://www.wikidata.org/w/api.php?action=wbsearchentities&search='+encoded+'&language=pt&uselang=pt&format=json&origin=*&limit=6').then(r=>r.ok?r.json():Promise.reject()).then(d=>(d.search||[]).map(e=>({title:e.label||e.id,subtitle:e.description||'Entidade no Wikidata',description:e.description||'',kind:/pessoa|escritor|rainha|rei|político|cientista|artista|imperador|militar/i.test(e.description||'')?'person':'event',query:e.label||q,url:'https://www.wikidata.org/wiki/'+e.id}))),fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=5&q='+encoded,{headers:{'Accept-Language':'pt-BR,pt;q=0.9,en;q=0.7'}}).then(r=>r.ok?r.json():Promise.reject()).then(d=>(d||[]).map(e=>({title:e.name||e.display_name.split(',')[0],subtitle:e.display_name,kind:'place',query:e.name||q,lat:Number(e.lat),lon:Number(e.lon),zoom:Number(e.type==='country'?5:e.type==='city'||e.type==='administrative'?11:14),url:'https://www.openstreetmap.org/?mlat='+e.lat+'&mlon='+e.lon})))];
+ const tasks=[fetch('https://www.wikidata.org/w/api.php?action=wbsearchentities&search='+encoded+'&language=pt&uselang=pt&format=json&origin=*&limit=6').then(r=>r.ok?r.json():Promise.reject()).then(d=>(d.search||[]).map(e=>({title:e.label||e.id,subtitle:e.description||'Entidade no Wikidata',description:e.description||'',kind:/pessoa|escritor|rainha|rei|político|cientista|artista|imperador|militar/i.test(e.description||'')?'person':'event',query:e.label||q,url:'https://www.wikidata.org/wiki/'+e.id}))),fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=5&accept-language=pt-BR&q='+encoded,{headers:{'Accept-Language':'pt-BR,pt;q=0.9,en;q=0.7'}}).then(r=>r.ok?r.json():Promise.reject()).then(d=>(d||[]).map(e=>({title:e.name||e.display_name.split(',')[0],subtitle:e.display_name,kind:'place',query:e.display_name||q,display_name:e.display_name,lat:Number(e.lat),lon:Number(e.lon),zoom:Number(e.type==='country'?5:e.type==='state'||e.type==='region'?7:e.type==='city'||e.type==='administrative'?11:/house|building|residential|address/.test(e.type+' '+(e.addresstype||''))?18:/street|road/.test(e.type+' '+(e.addresstype||''))?16:14),url:'https://www.openstreetmap.org/?mlat='+e.lat+'&mlon='+e.lon}))),fetch('https://photon.komoot.io/api/?limit=5&lang=pt&q='+encoded).then(r=>r.ok?r.json():Promise.reject()).then(d=>(d.features||[]).map(f=>{const p=f.properties||{},c=f.geometry?.coordinates||[];const display=[p.name,p.housenumber,p.street,p.district,p.city,p.state,p.country].filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i).join(', ');return {title:p.name||p.street||p.city||display,subtitle:display,kind:'place',query:display||q,display_name:display,lat:Number(c[1]),lon:Number(c[0]),zoom:p.housenumber?18:p.street?16:p.city?12:14};}))];
  const got=await Promise.allSettled(tasks);if(id!==suggestRequest||$('query').value.trim()!==q)return;const rows=[],seen=new Set();for(const result of got){if(result.status!=='fulfilled')continue;for(const o of result.value){const key=(o.title||'').toLocaleLowerCase('pt-BR').normalize('NFD').replace(/[\u0300-\u036f]/g,'');if(!key||seen.has(key))continue;seen.add(key);rows.push(o);}}
  // Put exact/near exact starts first, then places and knowledge-base matches.
  rows.sort((a,b)=>{const an=normalizeQuery(a.title).toLowerCase(),bn=normalizeQuery(b.title).toLowerCase(),qn=norm.toLowerCase();const score=o=>normalizeQuery(o.title).toLowerCase()===qn?0:normalizeQuery(o.title).toLowerCase().startsWith(qn)?1:o.kind==='place'?2:3;return score(a)-score(b);});drawSuggestions(rows,q);
 }
-function chooseSuggestion(index){const o=suggestRows[index];if(!o)return;$('query').value=o.title;closeSuggestions();search(o.query||o.title);if(o.kind==='place'&&Number.isFinite(o.lat)&&Number.isFinite(o.lon)){map.flyTo([o.lat,o.lon],o.zoom||12,{duration:.45});}}
+function chooseSuggestion(index){const o=suggestRows[index];if(!o)return;const searchText=o.kind==='place'?(o.display_name||o.query||o.title):(o.query||o.title);$('query').value=searchText;closeSuggestions();if(o.kind==='place'&&Number.isFinite(Number(o.lat))&&Number.isFinite(Number(o.lon))){const z=o.zoom||16;const place={title:o.name||o.display_name||searchText,lat:Number(o.lat),lon:Number(o.lon),desc:o.display_name||searchText,source:'OpenStreetMap / Photon',type:'place',year:null,_zoom:z,_isSearchedPlace:true};addSearchedPlace(place);status.textContent='endereço localizado';return;}search(searchText);}
 $('query').addEventListener('input',()=>{clearTimeout(suggestTimer);const q=$('query').value;if(q.trim().length<3){closeSuggestions();return;}suggestTimer=setTimeout(()=>fetchSuggestions(q),550);});
 $('query').addEventListener('keydown',e=>{if($('suggestions').style.display!=='block'||!suggestRows.length)return;if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();suggestIndex=(suggestIndex+(e.key==='ArrowDown'?1:-1)+suggestRows.length)%suggestRows.length;$('suggestions').querySelectorAll('.suggestion').forEach((el,i)=>{el.classList.toggle('selected',i===suggestIndex);el.setAttribute('aria-selected',i===suggestIndex?'true':'false');});$('suggestions').querySelectorAll('.suggestion')[suggestIndex]?.scrollIntoView({block:'nearest'});}else if(e.key==='Escape'){closeSuggestions();}else if(e.key==='Enter'&&suggestIndex>=0){e.preventDefault();chooseSuggestion(suggestIndex);}});
 document.addEventListener('click',e=>{if(!e.target.closest('.top'))closeSuggestions();});
@@ -191,14 +195,24 @@ function queryVariants(q){const n=normalizeQuery(q);const out=[q.trim(),n];const
 // Geocodifica lugares separadamente: a busca de um lugar deve priorizar o local,
 // aproximar o mapa e buscar artigos históricos na vizinhança, não enquadrar o mundo todo.
 async function geocodePlace(q){
- const url='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&addressdetails=1&q='+encodeURIComponent(q);
- const r=await fetch(url,{headers:{'Accept':'application/json'}});if(!r.ok)throw Error('Geocodificação '+r.status);
- const data=await r.json();if(!data.length)return null;
- const n=normalizeQuery(q).toLowerCase();
- const score=x=>{const name=normalizeQuery(x.name||'').toLowerCase(),display=normalizeQuery(x.display_name||'').toLowerCase();if(name===n)return 100;if(display===n||display.startsWith(n+',')||display.includes(', '+n+','))return 90;if(name&&n.includes(name))return 75;const a=new Set(n.split(' ').filter(t=>t.length>2)),b=new Set((name+' '+display).split(' '));let overlap=0;a.forEach(t=>{if(b.has(t))overlap++;});return a.size?overlap/a.size*50:0;};
- const best=[...data].sort((a,b)=>score(b)-score(a))[0];if(score(best)<45)return null;
- const addr=best.addresstype||best.type||'';const zoom=/country|continent/.test(addr)?5:/state|region|province|county/.test(addr)?7:/city|town|municipality/.test(addr)?11:/village|suburb|neighbourhood|quarter/.test(addr)?13:12;
- return {title:best.name||best.display_name,lat:Number(best.lat),lon:Number(best.lon),desc:best.display_name||'',thumbnail:'',url:'https://www.openstreetmap.org/?mlat='+best.lat+'&mlon='+best.lon+'#map='+zoom+'/'+best.lat+'/'+best.lon,source:'OpenStreetMap / Nominatim',type:'place',year:null,_zoom:zoom,_isSearchedPlace:true};
+ const clean=q.trim();if(clean.length<3)return null;
+ const nominatim=async query=>{
+  const url='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=8&addressdetails=1&accept-language=pt-BR&q='+encodeURIComponent(query);
+  const r=await fetch(url,{headers:{'Accept':'application/json'}});if(!r.ok)throw Error('Nominatim '+r.status);return await r.json();
+ };
+ const photon=async query=>{
+  const url='https://photon.komoot.io/api/?limit=8&lang=pt&q='+encodeURIComponent(query);
+  const r=await fetch(url,{headers:{'Accept':'application/json'}});if(!r.ok)throw Error('Photon '+r.status);const d=await r.json();
+  return (d.features||[]).map(f=>{const p=f.properties||{},c=f.geometry?.coordinates||[];return {lat:c[1],lon:c[0],name:p.name||p.street||p.city||p.locality||p.district||p.country,display_name:[p.name,p.housenumber,p.street,p.district,p.city,p.state,p.country].filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i).join(', '),type:p.type||p.osm_value||'',addresstype:p.type||p.osm_value||'',importance:p.extent?1:0};});
+ };
+ let data=[];try{data=await nominatim(clean);}catch(_){}
+ if(!data.length||(/\d/.test(clean)&&!data.some(x=>normalizeQuery(x.display_name||'').includes(normalizeQuery(clean)))))try{data=data.concat(await photon(clean));}catch(_){}
+ if(!data.length)return null;
+ const n=normalizeQuery(clean).toLowerCase();
+ const score=x=>{const name=normalizeQuery(x.name||'').toLowerCase(),display=normalizeQuery(x.display_name||'').toLowerCase();let s=0;if(name===n)s+=120;if(display===n)s+=150;else if(display.startsWith(n+',')||display.includes(', '+n+','))s+=100;if(name&&n.includes(name))s+=35;const a=new Set(n.split(' ').filter(t=>t.length>1)),b=new Set((name+' '+display).split(/[,\s]+/));let overlap=0;a.forEach(t=>{if(b.has(t))overlap++;});s+=a.size?overlap/a.size*65:0;if(/\d/.test(clean)&&/\d/.test(display))s+=15;if(x.type==='house'||x.addresstype==='house')s+=20;return s;};
+ const best=[...data].filter(x=>Number.isFinite(Number(x.lat))&&Number.isFinite(Number(x.lon))).sort((a,b)=>score(b)-score(a))[0];if(!best)return null;
+ const addr=(best.addresstype||best.type||'').toLowerCase();const zoom=/country|continent/.test(addr)?5:/state|region|province|county/.test(addr)?7:/city|town|municipality/.test(addr)?11:/village|suburb|neighbourhood|quarter|district/.test(addr)?14:/house|building|street|residential/.test(addr)?17:15;
+ return {title:best.name||best.display_name,lat:Number(best.lat),lon:Number(best.lon),desc:best.display_name||'',thumbnail:'',url:'https://www.openstreetmap.org/?mlat='+best.lat+'&mlon='+best.lon+'#map='+zoom+'/'+best.lat+'/'+best.lon,source:'Geocodificação OpenStreetMap / Photon',type:'place',year:null,_zoom:zoom,_isSearchedPlace:true};
 }
 async function nearbyWiki(lat,lon){
  const url='https://pt.wikipedia.org/w/api.php?action=query&format=json&origin=*&list=geosearch&gscoord='+encodeURIComponent(lat+'|'+lon)+'&gsradius=15000&gslimit=30&gsnamespace=0';
