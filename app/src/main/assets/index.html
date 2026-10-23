@@ -57,14 +57,14 @@
   try {
    globe=Globe()(host)
     .backgroundColor('rgba(0,0,0,0)')
-    .showAtmosphere(true).atmosphereColor('#65d9e8').atmosphereAltitude(0.16)
+    .showAtmosphere(false)
     .globeImageUrl('https://cdn.jsdelivr.net/npm/three-globe@2.45.0/example/img/earth-blue-marble.jpg')
-    .bumpImageUrl('https://cdn.jsdelivr.net/npm/three-globe@2.45.0/example/img/earth-topology.png')
-    .pointsData([]).pointLat('lat').pointLng('lon').pointColor(()=> '#f4cc69')
-    .pointAltitude(0.025).pointRadius(0.48).pointLabel(d=>`<b>${String(d.titulo||'Acontecimento histórico')}</b><br>${String(d.local||'')}`)
-    .onPointClick(p=>{if(p && Number.isFinite(p.lat)&&Number.isFinite(p.lon)){globe.pointOfView({lat:p.lat,lng:p.lon,altitude:1.5},1000)}});
-   globe.controls().autoRotate=true;globe.controls().autoRotateSpeed=0.35;globe.controls().enableZoom=true;globe.controls().minDistance=110;globe.controls().maxDistance=500;
-   const resize=()=>{if(!globe)return;const r=host.getBoundingClientRect();globe.width(Math.max(250,r.width)).height(Math.max(250,r.height))};
+    .rendererConfig({ antialias:false, alpha:true, powerPreference:'low-power' })
+    .pointsData(markers).pointLat('lat').pointLng('lon').pointColor(()=> '#f4cc69')
+    .pointAltitude(0.035).pointRadius(0.7).pointLabel(d=>`<b>${String(d.titulo||'Acontecimento histórico')}</b><br>${String(d.local||'')}<br><small>Toque para abrir os detalhes</small>`)
+    .onPointClick(p=>{if(p){if(window.openHistoricalMarker)window.openHistoricalMarker(p);if(Number.isFinite(p.lat)&&Number.isFinite(p.lon))globe.pointOfView({lat:p.lat,lng:p.lon,altitude:1.5},650)}});
+   globe.controls().autoRotate=false;globe.controls().enableZoom=true;globe.controls().minDistance=110;globe.controls().maxDistance=500;
+   const resize=()=>{if(!globe)return;const r=host.getBoundingClientRect();globe.width(Math.max(250,r.width)).height(Math.max(250,r.height));if(globe.renderer&&globe.renderer().setPixelRatio)globe.renderer().setPixelRatio(1)};
    window.addEventListener('resize',resize);resize();
    statusText('Globo 3D carregado · buscando contornos dos países…');
    fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json')
@@ -94,7 +94,7 @@
   $('network').textContent=navigator.onLine?'● online':'● offline';$('network').style.color=navigator.onLine?'#65d9e8':'#e8c66a';
   window.addEventListener('online',()=>{$('network').textContent='● online';$('network').style.color='#65d9e8'});
   window.addEventListener('offline',()=>{$('network').textContent='● offline';$('network').style.color='#e8c66a'});
-  renderTimeline();renderRecent();renderSimultaneous();setMarkersForYear(Number($('yearSlider').value));
+  renderTimeline();renderRecent();renderSimultaneous();window.CronoGlobe?.setMarkers(events.filter(e=>Number.isFinite(e.lat)&&Number.isFinite(e.lon)));$('globeStatus').textContent='Marcos históricos no globo: '+events.filter(e=>Number.isFinite(e.lat)&&Number.isFinite(e.lon)).length+' · toque em um marcador';
  }
  function card(e,online=false){const title=e.titulo||e.title||'Sem título', summary=e.resumo||e.extract||'Resumo não disponível.', date=e.inicio!=null?dateRange(e):(e.timestamp||'');const payload=encodeURIComponent(JSON.stringify(e));
   return `<article class="card"><div class="card-meta">${escapeHtml(e.tipo||'Artigo online')} ${date?' · '+escapeHtml(date):''}</div><h3>${escapeHtml(title)}</h3><p>${escapeHtml(summary.slice(0,240))}${summary.length>240?'…':''}</p><div class="card-actions"><button class="mini-btn" data-detail="${payload}">Explorar</button>${e.fonte||e.url?`<button class="mini-btn" data-open="${escapeHtml(e.fonte||e.url)}">Fonte ↗</button>`:''}${Number.isFinite(e.lat)&&Number.isFinite(e.lon)?`<button class="mini-btn" data-focus="${e.lat},${e.lon}">Ver no globo</button>`:''}</div></article>`;
@@ -118,6 +118,7 @@
  function renderRecent(){try{recent=JSON.parse(localStorage.getItem('atlasRecent')||'[]')}catch(e){recent=[]}$('recent').innerHTML=recent.length?recent.map(t=>`<button class="chip" data-query="${escapeHtml(t)}">${escapeHtml(t)}</button>`).join(''):'<span class="small muted">Suas pesquisas aparecerão aqui.</span>'}
  function openDetail(e){$('detailContent').innerHTML=`<div class="eyebrow gold">${escapeHtml(e.tipo||'ASSUNTO HISTÓRICO')}</div><h2 class="detail-title">${escapeHtml(e.titulo||e.title||'Detalhes')}</h2><div class="detail-section"><h3>PERÍODO</h3><p>${escapeHtml(e.inicio!=null?dateRange(e):(e.timestamp||'Data não informada'))}</p></div><div class="detail-section"><h3>RESUMO</h3><p>${escapeHtml(e.resumo||e.extract||'Não há resumo disponível para este item.')}</p></div><div class="detail-section"><h3>LOCALIZAÇÃO</h3><p>${escapeHtml(e.local||'Local não informado na fonte consultada.')}</p>${Number.isFinite(e.lat)&&Number.isFinite(e.lon)?'<button id="focusDetail" class="mini-btn">Localizar no globo</button>':''}</div>${e.contexto?`<div class="detail-section"><h3>CONTEXTO E INCERTEZAS</h3><p>${escapeHtml(e.contexto)}</p></div>`:''}<div class="detail-section"><h3>FONTE</h3><p><a class="source-link" href="${escapeHtml(e.fonte||e.url||'https://pt.wikipedia.org/')}" target="_blank" rel="noopener noreferrer">${escapeHtml(e.fonte||e.url||'Wikipédia')}</a></p></div>`;
   $('detailModal').classList.remove('hidden');const b=$('focusDetail');if(b)b.onclick=()=>{window.CronoGlobe?.focus(e.lat,e.lon);$('detailModal').classList.add('hidden')}}
+ window.openHistoricalMarker = e => { if(e) openDetail(e); };
  document.addEventListener('click',e=>{const q=e.target.closest('[data-query]');if(q){search(q.dataset.query);return}const d=e.target.closest('[data-detail]');if(d){try{openDetail(JSON.parse(decodeURIComponent(d.dataset.detail)))}catch(err){}return}const o=e.target.closest('[data-open]');if(o){window.open(o.dataset.open,'_blank','noopener');return}const f=e.target.closest('[data-focus]');if(f){const [lat,lon]=f.dataset.focus.split(',').map(Number);window.CronoGlobe?.focus(lat,lon);return}});
  $('searchBtn').addEventListener('click',()=>search($('query').value));$('query').addEventListener('keydown',e=>{if(e.key==='Enter')search($('query').value)});
  $('yearSlider').addEventListener('input',()=>{renderTimeline();renderSimultaneous()});$('closeModal').addEventListener('click',()=>$('detailModal').classList.add('hidden'));$('detailModal').addEventListener('click',e=>{if(e.target===$('detailModal'))$('detailModal').classList.add('hidden')});
