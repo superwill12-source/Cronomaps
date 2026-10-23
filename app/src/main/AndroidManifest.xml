@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET" />
-    <application android:allowBackup="true" android:label="Cronomaps" android:theme="@android:style/Theme.Material.Light.NoActionBar" android:usesCleartextTraffic="false" android:supportsRtl="true">
+    <application android:allowBackup="true" android:icon="@drawable/ic_cronomaps" android:roundIcon="@drawable/ic_cronomaps" android:label="Cronomaps" android:theme="@android:style/Theme.Material.Light.NoActionBar" android:usesCleartextTraffic="false" android:supportsRtl="true">
         <activity android:name="br.com.atlasdotempo.MainActivity" android:exported="true" android:screenOrientation="unspecified">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
