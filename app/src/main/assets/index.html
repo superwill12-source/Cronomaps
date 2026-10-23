@@ -1,130 +1,73 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#071326">
-<title>Cronomaps</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0b1728">
+<title>Cronomaps — mapa histórico</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;1,500;1,600&display=swap');
-:root{--bg:#071326;--panel:#0d1e36;--panel2:#102541;--gold:#e8c66a;--cyan:#65d9e8;--text:#edf3fb;--muted:#9eafc5;--line:#203650}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#18365a 0,transparent 50%),var(--bg);color:var(--text);font-family:'DM Sans',system-ui,sans-serif;line-height:1.5}.top{display:flex;align-items:center;gap:12px;padding:18px 20px 10px;max-width:980px;margin:auto}.brand-mark{display:grid;place-items:center;width:42px;height:42px;border:1px solid #927d48;border-radius:14px;color:var(--gold);font-size:25px}.eyebrow{font-size:10px;letter-spacing:2px;font-weight:700;color:var(--muted);margin:0 0 5px}.gold{color:var(--gold)}h1,h2,p{margin-top:0}h1{font-size:20px;margin:0;font-weight:600}h1 span{color:var(--gold)}.online{margin-left:auto;color:var(--cyan);font-size:11px;white-space:nowrap}.hero{max-width:980px;margin:auto;padding:20px 20px 6px;display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:center;min-height:300px}.hero-copy h2{font-size:clamp(30px,7vw,46px);line-height:1.1;margin:10px 0 14px;letter-spacing:-1px}.hero-copy h2 em{font-family:'Playfair Display',Georgia,serif;color:var(--gold);font-weight:500}.muted{color:var(--muted)}.hero-copy .muted{font-size:13px;max-width:340px}.globe-wrap{position:relative;min-width:0}.globe-wrap #globe{display:block;width:100%;height:340px;max-height:none;min-height:300px;touch-action:none;overflow:hidden;border-radius:0}.globe-hint{text-align:center;color:#8096b3;font-size:9px;margin-top:-8px}.search-panel,.section{max-width:940px;margin:16px auto;padding:20px;background:linear-gradient(145deg,rgba(16,37,65,.92),rgba(10,27,49,.96));border:1px solid var(--line);border-radius:20px}.search-panel label{font-size:10px;letter-spacing:1.8px;color:var(--gold);font-weight:700}.search-row{display:flex;gap:8px;margin-top:8px}.search-row input{min-width:0;flex:1;background:#07162a;border:1px solid #2a4664;border-radius:12px;padding:14px;color:var(--text);font:inherit;font-size:14px;outline:none}.search-row input:focus{border-color:var(--cyan)}button{font:inherit;cursor:pointer}.search-row button{width:52px;border:0;border-radius:12px;background:var(--gold);color:#111e30;font-size:28px}.small{font-size:11px}.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.chip{background:#122b49;color:#c5d6e9;border:1px solid #284766;border-radius:999px;padding:8px 12px;font-size:11px}.chip:active,button:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}.section{padding:18px 20px}.section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.section h2{font-size:19px;margin:0}.year-label{color:var(--gold);font-size:19px;font-weight:700}input[type=range]{width:100%;accent-color:var(--gold);margin:10px 0}.range-labels{display:flex;justify-content:space-between;color:var(--muted);font-size:10px}.cards{display:grid;gap:10px}.card{padding:14px;border:1px solid #253f5b;background:rgba(7,20,38,.65);border-radius:14px}.card h3{font-size:15px;margin:3px 0 5px}.card p{font-size:12px;color:var(--muted);margin:0 0 9px}.card-meta{font-size:10px;color:var(--cyan);margin-bottom:4px}.card-actions{display:flex;gap:8px;flex-wrap:wrap}.mini-btn,.text-button{background:transparent;border:1px solid #35526e;border-radius:9px;color:var(--gold);padding:7px 10px;font-size:11px}.compact{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}.hidden{display:none!important}.modal{position:fixed;inset:0;background:#020914d9;z-index:10;display:flex;align-items:flex-end;justify-content:center;padding:12px}.modal-card{position:relative;max-height:88vh;overflow:auto;width:100%;max-width:680px;background:#0d2039;border:1px solid #34516f;border-radius:22px 22px 16px 16px;padding:24px 20px 28px}.close{position:absolute;right:14px;top:10px;background:#1a3552;color:white;border:0;border-radius:50%;width:34px;height:34px;font-size:23px}.detail-title{padding-right:40px;font-size:25px;font-family:'Playfair Display',Georgia,serif}.detail-section{margin-top:18px}.detail-section h3{color:var(--gold);font-size:12px;letter-spacing:1px}.detail-section p{font-size:13px;color:#c3d0df}.source-link{color:var(--cyan);overflow-wrap:anywhere}.empty{border:1px dashed #35516c;padding:18px;border-radius:12px;color:var(--muted);font-size:13px}footer{max-width:940px;margin:20px auto;padding:0 20px 25px;display:flex;justify-content:space-between;color:#6f849e;font-size:10px}@media(max-width:600px){.hero{grid-template-columns:1fr;gap:0;padding-top:10px}.hero-copy{padding:0 2px}.hero-copy h2{font-size:34px}.hero-copy .muted{max-width:100%}.globe-wrap #globe{height:340px;max-height:none;min-height:300px;width:min(100%,420px);margin:auto;border-radius:0}.search-panel,.section{margin:12px 12px;padding:17px}.top{padding:15px 16px 5px}.online{font-size:9px}.compact{grid-template-columns:1fr}footer{padding-left:16px;padding-right:16px}}@media(min-width:700px){.cards:not(.compact){grid-template-columns:repeat(2,minmax(0,1fr))}}
-
+:root{color-scheme:dark;--bg:#0b1728;--panel:#12243a;--gold:#efc75e;--text:#f3f6fb;--muted:#a7b7ca;--line:#2a4059}
+*{box-sizing:border-box}html,body{height:100%;width:100%;margin:0;overflow:hidden;background:var(--bg);font-family:system-ui,-apple-system,Roboto,Arial,sans-serif;color:var(--text)}body{display:flex;flex-direction:column}.topbar{z-index:1000;background:var(--bg);padding:calc(env(safe-area-inset-top) + 10px) 12px 12px;border-bottom:1px solid var(--line);box-shadow:0 3px 16px #0005}.brand{display:flex;align-items:center;gap:9px;margin:0 0 10px;font-size:19px;font-weight:750;letter-spacing:.2px}.brand-icon{width:31px;height:31px;display:grid;place-items:center;background:var(--gold);color:#172238;border-radius:10px;font-size:18px}.brand span{color:var(--gold)}.search{display:flex;gap:8px}.search input{width:100%;min-width:0;border:1px solid #344d68;background:#f8fafc;color:#152238;border-radius:13px;padding:13px 14px;font-size:16px;outline:none}.search input::placeholder{color:#69788b}.search input:focus{border-color:var(--gold);box-shadow:0 0 0 2px #efc75e30}.search button{flex:0 0 50px;border:0;border-radius:13px;background:var(--gold);color:#142238;font-size:22px;font-weight:700}.subline{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:7px;font-size:11px;color:var(--muted)}#status{white-space:nowrap}#map{flex:1;min-height:0;width:100%;background:#d8e0e7}.leaflet-container{font-family:system-ui,-apple-system,Roboto,Arial,sans-serif}.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#10233a;color:#f4f7fb}.leaflet-popup-content{margin:12px 14px;line-height:1.4;min-width:180px;max-width:260px}.popup-title{font-weight:750;font-size:15px;margin-bottom:5px}.popup-date{font-size:11px;color:#efc75e;margin-bottom:6px}.popup-desc{font-size:12px;color:#d0dbea}.popup-link{display:inline-block;margin-top:8px;color:#75d9ec;text-decoration:none;font-weight:650;font-size:12px}.leaflet-popup-close-button{color:#fff!important}.pin{width:30px;height:38px;position:relative}.pin:before{content:'';position:absolute;left:5px;top:1px;width:20px;height:20px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#efc75e;border:2px solid #fff;box-shadow:0 2px 5px #0006}.pin:after{content:'';position:absolute;left:12px;top:8px;width:8px;height:8px;border-radius:50%;background:#162943}.legend{position:absolute;z-index:500;bottom:18px;left:12px;background:#10233aeb;border:1px solid #52677d;border-radius:12px;padding:9px 11px;color:#f1f5f9;font-size:11px;box-shadow:0 3px 12px #0003;max-width:calc(100% - 24px)}.legend strong{color:var(--gold)}.leaflet-control-zoom a{background:#10233a!important;color:#fff!important;border-color:#3b526c!important}.leaflet-control-attribution{font-size:9px!important}.leaflet-control-attribution a{color:#20588b!important}.busy{opacity:.65}.error{color:#ffd0c7!important}.results{position:absolute;z-index:1200;top:110px;left:12px;right:12px;max-height:42%;overflow:auto;background:#10233af5;border:1px solid #344d68;border-radius:14px;box-shadow:0 8px 30px #0006;display:none}.result{padding:11px 13px;border-bottom:1px solid #2a4059;cursor:pointer}.result:last-child{border-bottom:0}.result:active{background:#203c59}.result strong{display:block;font-size:13px}.result small{display:block;color:#efc75e;margin-top:2px}.result p{font-size:11px;color:#c1cede;margin:5px 0 0}.notice{position:absolute;z-index:600;left:50%;top:50%;transform:translate(-50%,-50%);width:calc(100% - 36px);max-width:360px;background:#10233af2;border:1px solid #52677d;border-radius:15px;padding:18px;text-align:center;box-shadow:0 8px 28px #0004;display:none}.notice strong{display:block;margin-bottom:5px}.notice p{margin:0;color:#c1cede;font-size:12px}
 </style>
 </head>
 <body>
-<header class="top"><div class="brand-mark">✦</div><div><div class="eyebrow">EXPLORE O PASSADO</div><h1>Crono<span>maps</span></h1></div><div class="online" id="network">● verificando</div></header>
-<main>
-<section class="hero">
-  <div class="hero-copy"><p class="eyebrow gold">A HISTÓRIA EM PERSPECTIVA</p><h2>O mundo tem<br><em>muitas histórias.</em></h2><p class="muted">Explore personagens, civilizações e acontecimentos — e descubra o que ocorria em diferentes lugares na mesma época.</p></div>
-  <div class="globe-wrap"><div id="globe" aria-label="Globo terrestre 3D interativo"></div><div class="globe-hint" id="globeStatus">Carregando mapa terrestre…</div><div class="globe-hint">Arraste para girar · pinça para zoom · toque nos marcadores históricos</div></div>
-</section>
-<section class="search-panel">
-  <label for="query">BUSCA HISTÓRICA</label>
-  <div class="search-row"><input id="query" type="search" placeholder="Ex.: Ana Bolena, bruxas, Egito Antigo…" autocomplete="off"><button id="searchBtn" aria-label="Pesquisar">⌕</button></div>
-  <p class="small muted">Busca local offline + pesquisa online na Wikipédia. Resultados online dependem da conexão.</p>
-  <div class="chips"><button class="chip" data-query="bruxas">Caça às bruxas</button><button class="chip" data-query="Cleópatra">Cleópatra</button><button class="chip" data-query="Vikings">Vikings</button><button class="chip" data-query="Império Romano">Roma Antiga</button></div>
-</section>
-<section id="resultsSection" class="section hidden"><div class="section-head"><h2>Resultados</h2><span id="resultCount" class="muted small"></span></div><div id="results" class="cards"></div></section>
-<section class="section timeline-section">
- <div class="section-head"><div><p class="eyebrow gold">NAVEGUE PELOS SÉCULOS</p><h2>Linha do tempo</h2></div><div id="yearLabel" class="year-label">2026 d.C.</div></div>
- <input id="yearSlider" type="range" min="-3000" max="2026" step="1" value="2026" aria-label="Ano histórico">
- <div class="range-labels"><span>3000 a.C.</span><span>2026 d.C.</span></div>
- <p id="periodLabel" class="muted">Mundo contemporâneo</p>
- <div id="eraEvents" class="cards compact"></div>
-</section>
-<section class="section">
- <div class="section-head"><div><p class="eyebrow gold">AO MESMO TEMPO</p><h2>Histórias simultâneas</h2></div></div>
- <p class="muted">Compare eventos disponíveis no mesmo intervalo. A base inicial é demonstrativa e não cobre toda a história mundial.</p>
- <div id="simultaneous" class="cards compact"></div>
-</section>
-<section class="section">
- <div class="section-head"><h2>Pesquisas recentes</h2><button id="clearRecent" class="text-button">Limpar</button></div><div id="recent" class="chips"></div>
-</section>
-<footer><span>Cronomaps · versão inicial</span><span>Dados locais + Wikimedia</span></footer>
-</main>
-<div id="detailModal" class="modal hidden" role="dialog" aria-modal="true"><div class="modal-card"><button id="closeModal" class="close" aria-label="Fechar">×</button><div id="detailContent"></div></div></div>
-<script>const HISTORICAL_EVENTS = [{"id": "egito-antigo", "titulo": "Egito Antigo", "tipo": "Civilização", "inicio": -3100, "fim": 30, "local": "Vale do Nilo, nordeste da África", "lat": 26.8, "lon": 30.8, "resumo": "Civilização do nordeste da África conhecida pela organização estatal, escrita hieroglífica, monumentos e longa história dinástica.", "contexto": "O Egito antigo atravessou períodos distintos; datas e fronteiras variam conforme a fase considerada.", "fonte": "https://www.britannica.com/place/ancient-Egypt"}, {"id": "cleopatra", "titulo": "Cleópatra VII", "tipo": "Personagem", "inicio": -69, "fim": -30, "local": "Alexandria, Egito", "lat": 31.2, "lon": 29.9, "resumo": "Última governante ativa do reino ptolemaico do Egito, ligada aos conflitos políticos de Roma no século I a.C.", "contexto": "Sua vida é conhecida por fontes antigas frequentemente escritas por autores ligados aos vencedores romanos.", "fonte": "https://www.britannica.com/biography/Cleopatra-queen-of-Egypt"}, {"id": "roma", "titulo": "Roma Antiga", "tipo": "Civilização", "inicio": -753, "fim": 476, "local": "Roma, atual Itália", "lat": 41.9, "lon": 12.5, "resumo": "Sociedade que passou da monarquia à república e ao império, exercendo influência duradoura no Mediterrâneo e na Europa.", "contexto": "476 d.C. é uma data convencional para o fim do Império Romano do Ocidente; o Império do Oriente continuou.", "fonte": "https://www.britannica.com/place/ancient-Rome"}, {"id": "ana-bolena", "titulo": "Ana Bolena", "tipo": "Personagem", "inicio": 1501, "fim": 1536, "local": "Inglaterra", "lat": 51.5, "lon": -0.1, "resumo": "Rainha consorte de Henrique VIII e mãe de Elizabeth I. Foi executada em 1536, durante conflitos dinásticos e religiosos na corte Tudor.", "contexto": "O ano de nascimento é incerto; estimativas comuns situam-no entre 1501 e 1507.", "fonte": "https://www.britannica.com/biography/Anne-Boleyn"}, {"id": "peste-negra", "titulo": "Peste Negra na Europa", "tipo": "Epidemia histórica", "inicio": 1347, "fim": 1353, "local": "Europa, com impacto em várias regiões da Eurásia", "lat": 45.5, "lon": 9.2, "resumo": "Grande onda de peste que causou mortalidade muito elevada em partes da Europa e transformações sociais e econômicas.", "contexto": "A epidemia fez parte de uma pandemia mais ampla; impacto e cronologia variaram por região.", "fonte": "https://www.britannica.com/event/Black-Death"}, {"id": "salem", "titulo": "Julgamentos das bruxas de Salém", "tipo": "Julgamento", "inicio": 1692, "fim": 1693, "local": "Colônia da Baía de Massachusetts, atual Estados Unidos", "lat": 42.52, "lon": -70.9, "resumo": "Série de acusações e julgamentos por bruxaria na Nova Inglaterra colonial, que resultou em execuções e prisões.", "contexto": "É um episódio específico e não representa todos os processos de caça às bruxas, que ocorreram em épocas e regiões diferentes.", "fonte": "https://www.britannica.com/event/Salem-witchcraft-trials"}, {"id": "revolucao-francesa", "titulo": "Revolução Francesa", "tipo": "Revolução", "inicio": 1789, "fim": 1799, "local": "França", "lat": 48.86, "lon": 2.35, "resumo": "Transformação política e social que derrubou a monarquia francesa e alterou profundamente a política europeia.", "contexto": "Os limites cronológicos convencionais variam; 1789 marca o início e 1799 o golpe de 18 de Brumário.", "fonte": "https://www.britannica.com/event/French-Revolution"}, {"id": "segunda-guerra", "titulo": "Segunda Guerra Mundial", "tipo": "Guerra", "inicio": 1939, "fim": 1945, "local": "Conflito global", "lat": 52.5, "lon": 13.4, "resumo": "Guerra mundial entre potências do Eixo e Aliados, marcada por combates em vários continentes, genocídio e uso de armas nucleares.", "contexto": "O início convencional na Europa é 1939; conflitos na Ásia tinham antecedentes anteriores.", "fonte": "https://www.britannica.com/event/World-War-II"}];</script>
-<script src="https://cdn.jsdelivr.net/npm/globe.gl@2.46.2/dist/globe.gl.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+<header class="topbar">
+  <div class="brand"><div class="brand-icon">⌖</div><div>Crono<span>maps</span></div></div>
+  <form class="search" id="searchForm"><input id="query" type="search" placeholder="Buscar lugar, pessoa ou evento histórico…" autocomplete="off" enterkeyhint="search"><button id="searchBtn" aria-label="Pesquisar">⌕</button></form>
+  <div class="subline"><span>Pesquise e toque nos marcadores para ver as fontes</span><span id="status">Conectando…</span></div>
+</header>
+<div id="map" aria-label="Mapa histórico interativo"></div>
+<div id="results" class="results"></div>
+<div id="notice" class="notice"><strong>Não foi possível carregar o mapa</strong><p>Confira sua conexão com a internet e tente novamente.</p></div>
+<div class="legend"><strong>Mapa histórico</strong><br>Arraste para mover · use +/− para zoom<br>Os dados dos resultados vêm da Wikipédia.</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script>
-/* Globo terrestre 3D real. A biblioteca e a textura são carregadas pela internet. */
-(() => {
- const host=document.getElementById('globe'), status=document.getElementById('globeStatus');
- let globe=null, markers=[];
- const statusText=t=>{if(status)status.textContent=t};
- function initGlobe(){
-  if(typeof Globe!=='function'){statusText('Biblioteca 3D não carregou. Verifique a internet e tente novamente.');return} if(!window.WebGLRenderingContext){statusText('Este aparelho/WebView não oferece suporte a WebGL para o globo 3D.');return}
-  try {
-   globe=Globe()(host)
-    .backgroundColor('rgba(0,0,0,0)')
-    .showAtmosphere(false)
-    .globeImageUrl('https://cdn.jsdelivr.net/npm/three-globe@2.45.0/example/img/earth-blue-marble.jpg')
-    .rendererConfig({ antialias:false, alpha:true, powerPreference:'low-power' })
-    .pointsData(markers).pointLat('lat').pointLng('lon').pointColor(()=> '#f4cc69')
-    .pointAltitude(0.035).pointRadius(0.55).pointLabel(d=>`<b>${String(d.titulo||'Acontecimento histórico')}</b><br>${String(d.local||'')}<br><small>Toque para abrir os detalhes</small>`)
-    .onPointClick(p=>{if(p){if(window.openHistoricalMarker)window.openHistoricalMarker(p);if(Number.isFinite(p.lat)&&Number.isFinite(p.lon))globe.pointOfView({lat:p.lat,lng:p.lon,altitude:1.5},650)}});
-   globe.controls().autoRotate=false;globe.controls().enableZoom=true;globe.pointOfView({lat:18,lng:10,altitude:2.2},0);
-   const resize=()=>{if(!globe)return;const r=host.getBoundingClientRect();globe.width(Math.max(250,r.width)).height(Math.max(250,r.height));if(globe.renderer&&globe.renderer().setPixelRatio)globe.renderer().setPixelRatio(1)};
-   window.addEventListener('resize',resize);resize();
-   statusText('Globo 3D carregado · buscando contornos dos países…');
-   fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json')
-    .then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json()})
-    .then(topology=>{if(window.topojson&&globe){const countries=topojson.feature(topology,topology.objects.countries).features;globe.polygonsData(countries).polygonCapColor(()=> 'rgba(28,91,105,0.18)').polygonSideColor(()=> 'rgba(101,217,232,0.08)').polygonStrokeColor(()=> 'rgba(101,217,232,0.28)').polygonAltitude(0.002);statusText('Globo terrestre 3D pronto · arraste e use pinça para zoom')}})
-    .catch(()=>statusText('Globo 3D ativo; contornos políticos indisponíveis nesta conexão.'));
-  } catch(err){statusText('Erro ao iniciar o globo 3D. Verifique a conexão com a internet.')}
+(function(){
+ const $=id=>document.getElementById(id), status=$('status'), notice=$('notice'), results=$('results');
+ if(!window.L){status.textContent='Mapa indisponível';status.className='error';notice.style.display='block';return;}
+ const map=L.map('map',{zoomControl:true,preferCanvas:true,worldCopyJump:true,zoomAnimation:false,fadeAnimation:false,markerZoomAnimation:false}).setView([22,8],2);
+ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{minZoom:1,maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',updateWhenIdle:true,keepBuffer:2}).addTo(map);
+ const markers=L.layerGroup().addTo(map);let searchMarkers=[];const cache={};
+ const historic=[
+  {title:'Pirâmides de Gizé',date:'c. 2600 a.C.',lat:29.9792,lon:31.1342,desc:'Complexo de pirâmides construído no Antigo Egito.',wiki:'https://pt.wikipedia.org/wiki/Pir%C3%A2mides_de_Giz%C3%A9'},
+  {title:'Acrópole de Atenas',date:'Antiguidade grega',lat:37.9715,lon:23.7267,desc:'Cidadela histórica associada à Atenas antiga.',wiki:'https://pt.wikipedia.org/wiki/Acr%C3%B3pole_de_Atenas'},
+  {title:'Coliseu de Roma',date:'Inaugurado em 80 d.C.',lat:41.8902,lon:12.4922,desc:'Anfiteatro da Roma imperial.',wiki:'https://pt.wikipedia.org/wiki/Coliseu'},
+  {title:'Petra',date:'Antiguidade',lat:30.3285,lon:35.4444,desc:'Cidade histórica nabateia escavada na rocha.',wiki:'https://pt.wikipedia.org/wiki/Petra'},
+  {title:'Stonehenge',date:'c. 3000–2000 a.C.',lat:51.1789,lon:-1.8262,desc:'Monumento pré-histórico de círculos de pedras.',wiki:'https://pt.wikipedia.org/wiki/Stonehenge'},
+  {title:'Machu Picchu',date:'Século XV',lat:-13.1631,lon:-72.545,desc:'Cidade inca situada nos Andes peruanos.',wiki:'https://pt.wikipedia.org/wiki/Machu_Picchu'},
+  {title:'Angkor Wat',date:'Século XII',lat:13.4125,lon:103.867,desc:'Templo monumental do Império Khmer.',wiki:'https://pt.wikipedia.org/wiki/Angkor_Wat'},
+  {title:'Pompeia',date:'Destruída em 79 d.C.',lat:40.7509,lon:14.4869,desc:'Cidade romana soterrada pela erupção do Vesúvio.',wiki:'https://pt.wikipedia.org/wiki/Pompeia'},
+  {title:'Grande Muralha da China',date:'Vários períodos',lat:40.4319,lon:116.5704,desc:'Sistema de fortificações construído ao longo de séculos.',wiki:'https://pt.wikipedia.org/wiki/Grande_Muralha_da_China'},
+  {title:'Tenochtitlán (centro histórico)',date:'Fundada no século XIV',lat:19.4326,lon:-99.1332,desc:'Capital do Império Asteca, na atual Cidade do México.',wiki:'https://pt.wikipedia.org/wiki/Tenochtitlan'},
+  {title:'Teotihuacán',date:'c. 100 a.C.–550 d.C.',lat:19.6925,lon:-98.8438,desc:'Grande centro urbano da Mesoamérica antiga.',wiki:'https://pt.wikipedia.org/wiki/Teotihuacan'},
+  {title:'Éfeso',date:'Antiguidade',lat:37.9394,lon:27.3417,desc:'Cidade antiga da Anatólia, hoje na Turquia.',wiki:'https://pt.wikipedia.org/wiki/%C3%89feso'}
+ ];
+ function icon(){return L.divIcon({className:'',html:'<div class="pin"></div>',iconSize:[30,38],iconAnchor:[15,36],popupAnchor:[0,-32]});}
+ function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+ function popupHtml(o){return '<div class="popup-title">'+esc(o.title)+'</div>'+(o.date?'<div class="popup-date">'+esc(o.date)+'</div>':'')+(o.desc?'<div class="popup-desc">'+esc(o.desc.slice(0,480))+'</div>':'')+(o.wiki?'<a class="popup-link" href="'+esc(o.wiki)+'" target="_blank" rel="noopener">Abrir fonte / Wikipédia ↗</a>':'');}
+ function addMarker(o,layer=markers){if(!Number.isFinite(Number(o.lat))||!Number.isFinite(Number(o.lon)))return null;const m=L.marker([Number(o.lat),Number(o.lon)],{icon:icon(),keyboard:true,title:o.title||'Evento histórico'}).bindPopup(popupHtml(o),{maxWidth:280});m.addTo(layer);m.on('click',()=>{status.textContent='Fonte histórica';});return m;}
+ historic.forEach(o=>addMarker(o));status.textContent='Mapa pronto';
+ function closeResults(){results.style.display='none';results.innerHTML='';}
+ function showResults(items){results.innerHTML='';if(!items.length){results.innerHTML='<div class="result"><strong>Nenhum resultado com coordenadas</strong><p>Tente outro termo, por exemplo: Cleópatra, Roma, Pompeia ou Vikings.</p></div>';results.style.display='block';return;}items.forEach((o,i)=>{const div=document.createElement('div');div.className='result';div.innerHTML='<strong>'+esc(o.title)+'</strong>'+(o.date?'<small>'+esc(o.date)+'</small>':'')+'<p>'+esc((o.desc||'Artigo da Wikipédia').slice(0,150))+'</p>';div.addEventListener('click',()=>{if(o.marker){map.flyTo([o.lat,o.lon],Math.max(map.getZoom(),5),{duration:.35});o.marker.openPopup();}closeResults();});results.appendChild(div);});results.style.display='block';}
+ async function search(q){q=q.trim();if(!q)return;closeResults();status.textContent='Buscando…';status.classList.remove('error');$('searchBtn').classList.add('busy');
+  searchMarkers.forEach(m=>map.removeLayer(m));searchMarkers=[];
+  try{
+   const url='https://pt.wikipedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrsearch='+encodeURIComponent(q)+'&gsrnamespace=0&gsrlimit=18&prop=coordinates%7Cextracts%7Cinfo&inprop=url&exintro=1&explaintext=1&exchars=500&colimit=10';
+   const r=await fetch(url,{headers:{'Accept':'application/json'}});if(!r.ok)throw new Error('HTTP '+r.status);const data=await r.json();const pages=Object.values((data.query&&data.query.pages)||{});
+   const items=pages.map(p=>{const c=p.coordinates&&p.coordinates[0];if(!c)return null;return {title:p.title,lat:c.lat,lon:c.lon,desc:p.extract||'',wiki:p.fullurl||('https://pt.wikipedia.org/wiki/'+encodeURIComponent(p.title.replace(/ /g,'_'))),date:'Fonte: Wikipédia',pageid:p.pageid};}).filter(Boolean);
+   if(!items.length){status.textContent='Sem coordenadas';showResults([]);return;}
+   items.forEach(o=>{o.marker=addMarker(o);if(o.marker)searchMarkers.push(o.marker);});
+   const bounds=L.latLngBounds(items.map(o=>[o.lat,o.lon]));if(bounds.isValid()){if(items.length===1)map.flyTo([items[0].lat,items[0].lon],Math.max(map.getZoom(),6),{duration:.4});else map.flyToBounds(bounds.pad(.25),{maxZoom:7,duration:.4});}
+   status.textContent=items.length+' local(is)';showResults(items);
+  }catch(e){status.textContent='Sem conexão';status.classList.add('error');showResults([]);const first=results.firstElementChild;if(first)first.innerHTML='<strong>Não foi possível consultar a Wikipédia</strong><p>Confira a internet e tente novamente. Os marcadores históricos iniciais continuam disponíveis no mapa.</p>';}
+  finally{$('searchBtn').classList.remove('busy');}
  }
- window.CronoGlobe={
-  setMarkers(list){markers=(list||[]).filter(x=>Number.isFinite(x.lat)&&Number.isFinite(x.lon));if(globe)globe.pointsData(markers)},
-  focus(lat,lon){if(globe&&Number.isFinite(lat)&&Number.isFinite(lon)){globe.pointOfView({lat,lng:lon,altitude:1.45},1200);globe.controls().autoRotate=false}},
-  reset(){if(globe){globe.pointOfView({lat:15,lng:0,altitude:2.4},1000);globe.controls().autoRotate=true}}
- };
- window.addEventListener('online',()=>{if(!globe)initGlobe()});
- initGlobe();
+ $('searchForm').addEventListener('submit',e=>{e.preventDefault();search($('query').value);});
+ map.on('click',()=>{if(results.style.display==='block')closeResults();});
+ window.addEventListener('load',()=>{setTimeout(()=>map.invalidateSize(true),250);setTimeout(()=>map.invalidateSize(true),900);});window.addEventListener('resize',()=>map.invalidateSize(true));
+ setTimeout(()=>{if(!document.querySelector('.leaflet-tile')){notice.style.display='block';status.textContent='Verifique a conexão';}},6500);
 })();
 </script>
-<script>
-(() => {
- const $=id=>document.getElementById(id); let events=[], recent=[];
- const normalize=s=>(s||'').toLocaleLowerCase('pt-BR').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
- const yearText=y=>y<0?`${Math.abs(y)} a.C.`:`${y} d.C.`;
- const dateRange=e=>e.inicio==null?'Data incerta':`${yearText(e.inicio)}${e.fim!=null&&e.fim!==e.inicio?' – '+yearText(e.fim):''}`;
- const period=y=>y< -1000?'Antiguidade — primeiras civilizações':y<500?'Antiguidade':y<1500?'Idade Média (periodização convencional)':y<1789?'Idade Moderna':y<1945?'Idade Contemporânea': 'Mundo contemporâneo';
- const escapeHtml=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
- async function init(){events=HISTORICAL_EVENTS;
-  $('network').textContent=navigator.onLine?'● online':'● offline';$('network').style.color=navigator.onLine?'#65d9e8':'#e8c66a';
-  window.addEventListener('online',()=>{$('network').textContent='● online';$('network').style.color='#65d9e8'});
-  window.addEventListener('offline',()=>{$('network').textContent='● offline';$('network').style.color='#e8c66a'});
-  renderTimeline();renderRecent();renderSimultaneous();window.CronoGlobe?.setMarkers(events.filter(e=>Number.isFinite(e.lat)&&Number.isFinite(e.lon)));$('globeStatus').textContent='Marcos históricos: '+events.filter(e=>Number.isFinite(e.lat)&&Number.isFinite(e.lon)).length+' · toque em um ponto dourado';
- }
- function card(e,online=false){const title=e.titulo||e.title||'Sem título', summary=e.resumo||e.extract||'Resumo não disponível.', date=e.inicio!=null?dateRange(e):(e.timestamp||'');const payload=encodeURIComponent(JSON.stringify(e));
-  return `<article class="card"><div class="card-meta">${escapeHtml(e.tipo||'Artigo online')} ${date?' · '+escapeHtml(date):''}</div><h3>${escapeHtml(title)}</h3><p>${escapeHtml(summary.slice(0,240))}${summary.length>240?'…':''}</p><div class="card-actions"><button class="mini-btn" data-detail="${payload}">Explorar</button>${e.fonte||e.url?`<button class="mini-btn" data-open="${escapeHtml(e.fonte||e.url)}">Fonte ↗</button>`:''}${Number.isFinite(e.lat)&&Number.isFinite(e.lon)?`<button class="mini-btn" data-focus="${e.lat},${e.lon}">Ver no globo</button>`:''}</div></article>`;
- }
- async function search(term){term=term.trim();if(!term)return;$('query').value=term;saveRecent(term);$('resultsSection').classList.remove('hidden');$('results').innerHTML='<div class="empty">Pesquisando na base local…</div>';$('resultCount').textContent='';
-  const q=normalize(term);let local=events.filter(e=>normalize([e.titulo,e.tipo,e.local,e.resumo,e.contexto].join(' ')).includes(q));
-  // Busca local por palavras para ajudar termos compostos sem depender de uma lista de aliases fixa.
-  if(!local.length){const words=q.split(/\s+/).filter(w=>w.length>1);local=events.map(e=>({...e,_score:words.reduce((n,w)=>n+(normalize([e.titulo,e.tipo,e.local,e.resumo,e.contexto].join(' ')).includes(w)?1:0),0)})).filter(e=>e._score>0).sort((a,b)=>b._score-a._score)}
-  let online=[],onlineError=false;
-  if(navigator.onLine){try{const url='https://pt.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch='+encodeURIComponent(term)+'&gsrnamespace=0&gsrlimit=8&prop=extracts|info&exintro=1&explaintext=1&inprop=url&format=json&origin=*';const res=await fetch(url,{headers:{Accept:'application/json'}});if(!res.ok)throw new Error('HTTP '+res.status);const data=await res.json();online=Object.values(data.query?.pages||{}).map(p=>({titulo:p.title,resumo:p.extract||'Resumo não disponível.',url:p.fullurl||`https://pt.wikipedia.org/wiki/${encodeURIComponent(p.title.replace(/ /g,'_'))}`,tipo:'Wikipédia',fonte:p.fullurl||'https://pt.wikipedia.org/',timestamp:'',id:'wiki-'+p.pageid}));}catch(e){onlineError=true}}
-  const seen=new Set(local.map(e=>normalize(e.titulo)));online=online.filter(e=>!seen.has(normalize(e.titulo)));
-  const all=[...local,...online];$('resultCount').textContent=`${all.length} resultado(s)`;
-  $('results').innerHTML=all.length?all.map(e=>card(e)).join(''):`<div class="empty">Nenhum resultado encontrado para “${escapeHtml(term)}”. ${navigator.onLine?'Tente outras palavras ou uma grafia alternativa.':'Você está offline. Conecte-se à internet para ampliar a busca.'}</div>`;
-  if(onlineError)$('results').insertAdjacentHTML('beforeend','<p class="small muted">Não foi possível consultar a Wikipédia agora. Os resultados locais continuam disponíveis.</p>');
-  $('resultsSection').scrollIntoView({behavior:'smooth',block:'start'});
- }
- function renderTimeline(){const y=Number($('yearSlider').value);$('yearLabel').textContent=yearText(y);$('periodLabel').textContent=period(y);const list=events.filter(e=>(e.inicio==null||e.inicio<=y)&&(e.fim==null||e.fim>=y));$('eraEvents').innerHTML=list.length?list.map(e=>card(e)).join(''):'<div class="empty">Não há eventos cadastrados para esse ano na base local. A busca online pode encontrar contexto adicional.</div>';setMarkersForYear(y)}
- function setMarkersForYear(y){const matching=events.filter(e=>(e.inicio==null||e.inicio<=y)&&(e.fim==null||e.fim>=y)&&Number.isFinite(e.lat)&&Number.isFinite(e.lon));window.CronoGlobe?.setMarkers(matching.length?matching:events.filter(e=>Number.isFinite(e.lat)&&Number.isFinite(e.lon)))}
- function renderSimultaneous(){const y=Number($('yearSlider').value);const list=events.filter(e=>e.inicio<=y&&e.fim>=y);$('simultaneous').innerHTML=list.length?list.map(e=>`<article class="card"><div class="card-meta">${escapeHtml(e.local||'Local não especificado')}</div><h3>${escapeHtml(e.titulo)}</h3><p>${escapeHtml(e.resumo)}</p><button class="mini-btn" data-detail="${encodeURIComponent(JSON.stringify(e))}">Comparar / detalhes</button></article>`).join(''):'<div class="empty">Sem registros locais para comparar nesta data.</div>'}
- function saveRecent(t){recent=[t,...recent.filter(x=>normalize(x)!==normalize(t))].slice(0,8);try{localStorage.setItem('atlasRecent',JSON.stringify(recent))}catch(e){}renderRecent()}
- function renderRecent(){try{recent=JSON.parse(localStorage.getItem('atlasRecent')||'[]')}catch(e){recent=[]}$('recent').innerHTML=recent.length?recent.map(t=>`<button class="chip" data-query="${escapeHtml(t)}">${escapeHtml(t)}</button>`).join(''):'<span class="small muted">Suas pesquisas aparecerão aqui.</span>'}
- function openDetail(e){$('detailContent').innerHTML=`<div class="eyebrow gold">${escapeHtml(e.tipo||'ASSUNTO HISTÓRICO')}</div><h2 class="detail-title">${escapeHtml(e.titulo||e.title||'Detalhes')}</h2><div class="detail-section"><h3>PERÍODO</h3><p>${escapeHtml(e.inicio!=null?dateRange(e):(e.timestamp||'Data não informada'))}</p></div><div class="detail-section"><h3>RESUMO</h3><p>${escapeHtml(e.resumo||e.extract||'Não há resumo disponível para este item.')}</p></div><div class="detail-section"><h3>LOCALIZAÇÃO</h3><p>${escapeHtml(e.local||'Local não informado na fonte consultada.')}</p>${Number.isFinite(e.lat)&&Number.isFinite(e.lon)?'<button id="focusDetail" class="mini-btn">Localizar no globo</button>':''}</div>${e.contexto?`<div class="detail-section"><h3>CONTEXTO E INCERTEZAS</h3><p>${escapeHtml(e.contexto)}</p></div>`:''}<div class="detail-section"><h3>FONTE</h3><p><a class="source-link" href="${escapeHtml(e.fonte||e.url||'https://pt.wikipedia.org/')}" target="_blank" rel="noopener noreferrer">${escapeHtml(e.fonte||e.url||'Wikipédia')}</a></p></div>`;
-  $('detailModal').classList.remove('hidden');const b=$('focusDetail');if(b)b.onclick=()=>{window.CronoGlobe?.focus(e.lat,e.lon);$('detailModal').classList.add('hidden')}}
- window.openHistoricalMarker = e => { if(e) openDetail(e); };
- document.addEventListener('click',e=>{const q=e.target.closest('[data-query]');if(q){search(q.dataset.query);return}const d=e.target.closest('[data-detail]');if(d){try{openDetail(JSON.parse(decodeURIComponent(d.dataset.detail)))}catch(err){}return}const o=e.target.closest('[data-open]');if(o){window.open(o.dataset.open,'_blank','noopener');return}const f=e.target.closest('[data-focus]');if(f){const [lat,lon]=f.dataset.focus.split(',').map(Number);window.CronoGlobe?.focus(lat,lon);return}});
- $('searchBtn').addEventListener('click',()=>search($('query').value));$('query').addEventListener('keydown',e=>{if(e.key==='Enter')search($('query').value)});
- $('yearSlider').addEventListener('input',()=>{renderTimeline();renderSimultaneous()});$('closeModal').addEventListener('click',()=>$('detailModal').classList.add('hidden'));$('detailModal').addEventListener('click',e=>{if(e.target===$('detailModal'))$('detailModal').classList.add('hidden')});
- $('clearRecent').addEventListener('click',()=>{recent=[];try{localStorage.removeItem('atlasRecent')}catch(e){}renderRecent()});
- init();
-})();
-
-</script>
-</body></html>
+</body>
+</html>
