@@ -8,6 +8,10 @@ O conteúdo principal da interface, estilos, JavaScript e dados locais está reu
 - **Autocompletar:** ao digitar pelo menos três caracteres, o aplicativo sugere lugares, pessoas e entidades; toque numa sugestão para pesquisar e, quando for um lugar, aproximar o mapa.
 - Navegação por teclado nas sugestões (setas, Enter e Esc), útil em dispositivos com teclado físico.
 - Consultas de sugestões com atraso de 550 ms para reduzir pedidos repetidos enquanto se digita.
+- **Consolidação de eventos:** combina feeds de acontecimentos do dia da Wikipédia em português e inglês, On This Day API, eventos com data e coordenadas do Wikidata, terremotos do USGS (magnitude 4+) e eventos ambientais georreferenciados da NASA EONET quando disponíveis.
+- **Diagnóstico por fonte:** mostra quantos registros cada serviço retornou ou se a consulta falhou, com botão para tentar novamente.
+- **Mapa sem coordenadas inventadas:** acontecimentos sem localização confiável continuam na lista; coordenadas extraídas do artigo da Wikipédia são identificadas como aproximadas.
+- A cobertura histórica depende dos registros existentes em cada base. O USGS cobre terremotos registrados a partir de 1900; o feed “neste dia” mostra aniversários históricos, e não afirma que todos ocorreram no ano selecionado.
 
 ## Pastas dentro de `app/src/main`
 - `assets/` — interface, CSS e JavaScript em `index.html`.
