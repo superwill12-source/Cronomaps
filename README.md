@@ -22,3 +22,7 @@ As demais pastas contêm configurações Android/Gradle e o workflow GitHub Acti
 
 ## Gerar APK
 Envie os arquivos do ZIP para o repositório GitHub mantendo a pasta oculta `.github`. Na aba **Actions**, execute o workflow Android. Se a compilação terminar com sucesso, baixe o artefato `cronomaps-apk`.
+
+
+### Acontecimentos do Brasil e notícias por data
+A busca de acontecimentos atuais inclui consultas específicas a fontes brasileiras, além do feed global, NASA EONET e USGS. Ao alterar o ano/data na linha do tempo, o app consulta fontes de acontecimentos históricos e, para datas a partir de 2017, tenta recuperar reportagens arquivadas do GDELT para o dia selecionado. A cobertura depende das fontes e nem toda notícia tem coordenadas; nesses casos ela não pode virar marcador no mapa.
